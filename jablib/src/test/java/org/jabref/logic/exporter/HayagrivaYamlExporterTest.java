@@ -13,6 +13,7 @@ import org.jabref.logic.util.StandardFileType;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.field.StandardField;
+import org.jabref.model.entry.types.BiblatexNonStandardEntryType;
 import org.jabref.model.entry.types.StandardEntryType;
 import org.jabref.model.metadata.SaveOrder;
 
@@ -266,6 +267,36 @@ class HayagrivaYamlExporterTest {
                 "    - One, Other",
                 "  date: 2021-05-03",
                 "  url: http://example.com/2");
+
+        assertEquals(expected, Files.readAllLines(file));
+    }
+
+    @Test
+    final void exportsPerformanceEntry(@TempDir Path tempFile) throws IOException, SaveException, ParserConfigurationException, TransformerException {
+        BibEntry entry = new BibEntry(BiblatexNonStandardEntryType.Performance)
+                .withCitationKey("Example2024Performance")
+                .withField(StandardField.TITLE, "Example Performance Title")
+                .withField(StandardField.AUTHOR, "Example Author")
+                .withField(StandardField.DATE, "2024-09-12")
+                .withField(StandardField.VENUE, "Example Venue")
+                .withField(StandardField.LOCATION, "Example City")
+                .withField(StandardField.EVENTTITLE, "Example Event")
+                .withField(StandardField.TYPE, "Spoken Word Performance")
+                .withField(StandardField.URL, "https://example.org/event");
+
+        Path file = tempFile.resolve("RandomFileName");
+        Files.createFile(file);
+        hayagrivaYamlExporter.export(databaseContext, file, List.of(entry));
+
+        List<String> expected = List.of(
+                "Example2024Performance:",
+                "  type: performance",
+                "  title: \"Example Performance Title\"",
+                "  author:",
+                "    - Author, Example",
+                "  date: 2024-09-12",
+                "  location: Example City",
+                "  url: https://example.org/event");
 
         assertEquals(expected, Files.readAllLines(file));
     }
